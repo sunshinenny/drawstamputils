@@ -2,37 +2,34 @@
   <!-- 添加法律提示弹窗 -->
   <div v-if="showLegalDialog" class="legal-dialog-overlay">
     <div class="legal-dialog">
-      <h3>⚠️ 法律提示</h3>
+      <h3>⚠️ {{ t('legal.title') }}</h3>
       <div class="legal-content">
-        <p><strong>请确认您已知悉并同意以下内容：</strong></p>
-        <ol>
-          <li>本工具仅供学习和技术研究使用</li>
-          <li>使用本工具生成的任何图片请勿用于任何非法用途</li>
-          <li>因违法使用本工具造成的任何法律责任和损失，需自行承担</li>
-          <li>如果使用本工具请遵守相关法律法规</li>
-        </ol>
+        <p><strong>{{ t('legal.warning') }}</strong></p>
+        <p>
+            <span style="white-space: pre-line">{{ t('legal.securityItems') }}</span>
+          </p>
       </div>
       <div class="dialog-buttons">
-        <button @click="cancelSave" class="cancel-button">取消</button>
-        <button @click="confirmSave" class="confirm-button">我已知悉并同意</button>
+        <button @click="cancelSave" class="cancel-button">{{ t('legal.cancel') }}</button>
+        <button @click="confirmSave" class="confirm-button">{{ t('legal.confirm') }}</button>
       </div>
     </div>
   </div>
 
-  <div class="container">
+  <div class="container" :class="{ 'has-warning': showSecurityWarning }">
     <!-- 修改法律免责说明 -->
-    <div class="legal-disclaimer">
+    <div class="legal-disclaimer" 
+         v-if="showSecurityWarning"
+         :class="{ 'hidden': !showSecurityWarning }">
       <div class="disclaimer-content">
         <div class="warning-icon">⚠️</div>
         <div class="warning-text">
-          <h3>安全警告</h3>
-          <p><strong>本项目仅供学习和参考！严禁用于任何非法用途！</strong></p>
+          <h3>{{ t('legal.securityWarning') }}</h3>
+          <p><strong>{{ t('legal.securityNotice') }}</strong></p>
           <p>
-            1. 本项目开源代码仅用于技术学习和交流。<br>
-            2. 使用本项目生成的任何图片请勿用于任何非法用途。<br>
-            3. 因违法使用本项目造成的任何法律责任和损失，需自行承担，与本项目无关。<br>
-            4. 如果使用本项目请遵守相关法律法规。
+            <span style="white-space: pre-line">{{ t('legal.securityItems') }}</span>
           </p>
+          <button class="close-warning" @click="showSecurityWarning = false">×</button>
         </div>
       </div>
     </div>
@@ -43,8 +40,8 @@
         class="button-group"
         style="position: sticky; top: 0; z-index: 1000; background-color: white; padding: 10px"
       >
-        <button @click="saveStampAsPNG">保存印章</button>
-        <button @click="saveAsTemplate">保存模板</button>
+        <button @click="saveStampAsPNG">{{ t('stamp.save') }}</button>
+        <button @click="saveAsTemplate">{{ t('stamp.saveTemplate') }}</button>
         <input
           type="file"
           ref="templateFileInput"
@@ -52,53 +49,63 @@
           accept=".json"
           @change="loadTemplate"
         />
-        <button @click="triggerTemplateLoad">加载模板</button>
+        <button @click="triggerTemplateLoad">{{ t('stamp.loadTemplate') }}</button>
       </div>
 
       <!-- 印章基本设置 -->
       <div class="control-group">
         <div class="group-header" @click="toggleGroup('basic')">
-          <h3>印章基本设置</h3>
+          <h3>{{ t('stamp.basic.title') }}</h3>
           <span class="expand-icon" :class="{ 'expanded': expandedGroups.basic }">▼</span>
         </div>
         <div class="group-content" v-show="expandedGroups.basic">
           <label class="checkbox-label">
             <input type="checkbox" v-model="isCircleDetect" />
-            提取圆形印章
+            {{ t('stamp.basic.extractCircle') }}
           </label>
-          <label
-            >印章宽度 (mm):
-            <input type="number" v-model.number="drawStampWidth" min="1" max="50" step="1"
-          /></label>
-          <label
-            >印章高度 (mm):
-            <input type="number" v-model.number="drawStampHeight" min="1" max="50" step="1"
-          /></label>
-          <label
-            >圆形边框宽度 (mm): <input type="number" step="0.1" v-model.number="circleBorderWidth"
-          /></label>
-          <label>圆形边框颜色: <input type="color" v-model="primaryColor" /></label>
+          <label>
+            {{ t('stamp.basic.width') }}:
+            <input type="number" v-model.number="drawStampWidth" min="1" max="50" step="1" />
+          </label>
+          <label>
+            {{ t('stamp.basic.height') }}:
+            <input type="number" v-model.number="drawStampHeight" min="1" max="50" step="1" />
+          </label>
+          <label>
+            {{ t('stamp.basic.borderWidth') }}: <input type="number" step="0.1" v-model.number="circleBorderWidth" />
+          </label>
+          <label>
+            {{ t('stamp.basic.color') }}: <input type="color" v-model="primaryColor" />
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" v-model="drawOutBorder" />
+            {{ t('stamp.outBorder.enable') }}
+          </label>
+          <label v-if="drawOutBorder">
+            {{ t('stamp.outBorder.lineWidth') }}:
+            <input type="number" v-model.number="outBorderLineWidth" min="0.1" max="5" step="0.1" />
+          </label>
         </div>
       </div>
 
       <!-- 公司名称设置 -->
       <div class="control-group">
         <div class="group-header" @click="toggleGroup('company')">
-          <h3>公司名称列表设置</h3>
+          <h3>{{ t('stamp.company.title') }}</h3>
           <span class="expand-icon" :class="{ 'expanded': expandedGroups.company }">▼</span>
         </div>
         <div class="group-content" v-show="expandedGroups.company">
           <div v-for="(company, index) in companyList" :key="index" class="company-item">
             <div class="company-header">
-              <span>第 {{ index + 1 }} 行</span>
-              <button class="small-button delete-button" @click="removeCompany(index)">删除</button>
+              <span>{{ t('stamp.common.line', { index: index + 1 }) }}</span>
+              <button class="small-button delete-button" @click="removeCompany(index)">{{ t('stamp.common.delete') }}</button>
             </div>
             <label>
-              公司名称:
+              {{ t('stamp.company.name') }}:
               <input type="text" v-model="company.companyName" />
             </label>
             <label>
-              字体:
+              {{ t('stamp.company.font') }}:
               <div class="font-input-group">
                 <select
                   v-model="company.fontFamily"
@@ -119,19 +126,19 @@
                   v-model="company.fontFamily"
                   class="font-input"
                   @input="updateFontPreview"
-                  placeholder="输入字体名称"
+                  :placeholder="t('stamp.common.fontPlaceholder')"
                 />
               </div>
             </label>
             <label>
-              字体大小 (mm):
+              {{ t('stamp.company.fontSize') }}:
               <input type="number" v-model.number="company.fontHeight" min="1" max="10" step="0.1" />
             </label>
             <label>
-              字体粗细:
+              {{ t('stamp.company.fontWeight') }}:
               <select v-model="company.fontWeight">
-                <option value="normal">正常</option>
-                <option value="bold">粗体</option>
+                <option value="normal">{{ t('stamp.common.fontWeight.normal') }}</option>
+                <option value="bold">{{ t('stamp.common.fontWeight.bold') }}</option>
                 <option value="100">100</option>
                 <option value="200">200</option>
                 <option value="300">300</option>
@@ -144,7 +151,7 @@
               </select>
             </label>
             <label>
-              压缩比例:
+              {{ t('stamp.company.compression') }}:
               <input
                 type="range"
                 v-model.number="company.compression"
@@ -155,61 +162,67 @@
               <span>{{ company.compression.toFixed(2) }}</span>
             </label>
             <label>
-              分布因子:
+              {{ t('stamp.company.distribution') }}:
               <input
                 type="range"
                 v-model.number="company.textDistributionFactor"
-                min="1"
+                min="0"
                 max="50"
-                step="0.5"
+                step="0.1"
               />
-              <span>{{ company.textDistributionFactor.toFixed(1) }}</span>
+              <span>{{ company.textDistributionFactor.toFixed(2) }}</span>
             </label>
             <label>
-              边距 (mm):
+              {{ t('stamp.company.margin') }}:
               <input type="number" v-model.number="company.borderOffset" min="-10" max="10" step="0.05" />
             </label>
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="company.adjustEllipseText" /> 调整椭圆文字
+            <label>
+              {{ t('stamp.company.startAngle') }}:
+              <div class="range-container">
+                <input
+                  type="range"
+                  v-model.number="company.startAngle"
+                  min="-3.14"
+                  max="3.14"
+                  step="0.01"
+                />
+                <span>{{ (company.startAngle * 180 / Math.PI).toFixed(0) }}°</span>
+              </div>
             </label>
-            <label v-if="company.adjustEllipseText">
-              椭圆文字调整:
-              <input
-                type="range"
-                v-model.number="company.adjustEllipseTextFactor"
-                min="0"
-                max="2"
-                step="0.01"
-              />
-              <span>{{ company.adjustEllipseTextFactor.toFixed(2) }}</span>
+            <label>
+              {{ t('stamp.company.rotateDirection') }}:
+              <select v-model="company.rotateDirection">
+                <option value="clockwise">{{ t('stamp.company.clockwise') }}</option>
+                <option value="counterclockwise">{{ t('stamp.company.counterclockwise') }}</option>
+              </select>
             </label>
           </div>
-          <button class="add-button" @click="addNewCompany">添加新行</button>
+          <button class="add-button" @click="addNewCompany">{{ t('stamp.common.addNew') }}</button>
         </div>
       </div>
 
       <!-- 印章类型设置 -->
       <div class="control-group">
         <div class="group-header" @click="toggleGroup('stampType')">
-          <h3>印章类型列表设置</h3>
+          <h3>{{ t('stamp.stampType.title') }}</h3>
           <span class="expand-icon" :class="{ 'expanded': expandedGroups.stampType }">▼</span>
         </div>
         <div class="group-content" v-show="expandedGroups.stampType">
           <div v-for="(type, index) in stampTypeList" :key="index" class="stamp-type-item">
             <div class="stamp-type-header">
-              <span>第 {{ index + 1 }} 行</span>
-              <button class="small-button delete-button" @click="removeStampType(index)">删除</button>
+              <span>{{ t('stamp.stampType.line', { index: index + 1 }) }}</span>
+              <button class="small-button delete-button" @click="removeStampType(index)">{{ t('stamp.stampType.delete') }}</button>
             </div>
             <label>
-              文字内容:
+              {{ t('stamp.stampType.type') }}:
               <input type="text" v-model="type.stampType" />
             </label>
             <label>
-              字体大小 (mm):
+              {{ t('stamp.stampType.fontSize') }}:
               <input type="number" v-model.number="type.fontHeight" min="1" max="10" step="0.1" />
             </label>
             <label>
-              字体:
+              {{ t('stamp.stampType.font') }}:
               <div class="font-input-group">
                 <input
                   type="text"
@@ -227,7 +240,7 @@
               </div>
             </label>
             <label>
-              字体粗细:
+              {{ t('stamp.stampType.fontWeight') }}:
               <select v-model="type.fontWeight">
                 <option value="normal">正常</option>
                 <option value="bold">粗体</option>
@@ -243,7 +256,7 @@
               </select>
             </label>
             <label>
-              压缩比例:
+              {{ t('stamp.stampType.compression') }}:
               <input
                 type="range"
                 v-model.number="type.compression"
@@ -254,7 +267,7 @@
               <span>{{ type.compression.toFixed(2) }}</span>
             </label>
             <label>
-              字符间距 (mm):
+              {{ t('stamp.stampType.letterSpacing') }}:
               <input
                 type="range"
                 v-model.number="type.letterSpacing"
@@ -265,7 +278,7 @@
               <span>{{ type.letterSpacing.toFixed(2) }}</span>
             </label>
             <label>
-              垂直位置 (mm):
+              {{ t('stamp.stampType.verticalPosition') }}:
               <input
                 type="number"
                 v-model.number="type.positionY"
@@ -275,20 +288,20 @@
               />
             </label>
           </div>
-          <button class="add-button" @click="addNewStampType">添加新行</button>
+          <button class="add-button" @click="addNewStampType">{{ t('stamp.stampType.addNew') }}</button>
         </div>
       </div>
 
       <!-- 印章编码设置 -->
       <div class="control-group">
         <div class="group-header" @click="toggleGroup('code')">
-          <h3>印章编码设置</h3>
+          <h3>{{ t('stamp.code.title') }}</h3>
           <span class="expand-icon" :class="{ 'expanded': expandedGroups.code }">▼</span>
         </div>
         <div class="group-content" v-show="expandedGroups.code">
-          <label>印章编码: <input v-model="stampCode" /></label>
+          <label>{{ t('stamp.code.code') }}: <input v-model="stampCode" /></label>
           <label>
-            字体:
+            {{ t('stamp.code.font') }}:
             <div class="font-input-group">
               <select
                 v-model="codeFontFamily"
@@ -313,14 +326,14 @@
               />
             </div>
           </label>
-          <label
-            >字体大小 (mm): <input type="number" v-model.number="codeFontSizeMM" step="0.1"
-          /></label>
           <label>
-            字体粗细:
+            {{ t('stamp.code.fontSize') }}: <input type="number" v-model.number="codeFontSizeMM" step="0.1" />
+          </label>
+          <label>
+            {{ t('stamp.code.fontWeight') }}:
             <select v-model="codeFontWeight">
-              <option value="normal">正常</option>
-              <option value="bold">粗体</option>
+              <option value="normal">{{ t('stamp.common.fontWeight.normal') }}</option>
+              <option value="bold">{{ t('stamp.common.fontWeight.bold') }}</option>
               <option value="100">100</option>
               <option value="200">200</option>
               <option value="300">300</option>
@@ -333,11 +346,11 @@
             </select>
           </label>
           <label>
-            <span>压缩比例：{{ codeCompression.toFixed(2) }}</span>
+            <span>{{ t('stamp.common.compression', { value: codeCompression.toFixed(2) }) }}</span>
             <input type="range" v-model.number="codeCompression" min="0.0" max="3" step="0.01" />
           </label>
           <label>
-            <span>分布因子: {{ codeDistributionFactor.toFixed(1) }}</span>
+            <span>{{ t('stamp.common.distribution', { value: codeDistributionFactor.toFixed(1) }) }}</span>
             <input
               type="range"
               v-model.number="codeDistributionFactor"
@@ -347,7 +360,7 @@
             />
           </label>
           <label>
-            边距 (mm):
+            {{ t('stamp.code.margin') }}:
             <input type="number" v-model.number="codeMarginMM" min="-10" max="20" step="0.05" />
           </label>
         </div>
@@ -356,13 +369,13 @@
       <!-- 税号设置 -->
       <div class="control-group">
         <div class="group-header" @click="toggleGroup('taxNumber')">
-          <h3>税号设置</h3>
+          <h3>{{ t('stamp.taxNumber.title') }}</h3>
           <span class="expand-icon" :class="{ 'expanded': expandedGroups.taxNumber }">▼</span>
         </div>
         <div class="group-content" v-show="expandedGroups.taxNumber">
-          <label>税号: <input v-model="taxNumberValue" /></label>
+          <label>{{ t('stamp.taxNumber.number') }}: <input v-model="taxNumberValue" /></label>
           <label>
-            字体:
+            {{ t('stamp.taxNumber.font') }}:
             <div class="font-input-group">
               <select
                 v-model="taxNumberFontFamily"
@@ -388,7 +401,7 @@
             </div>
           </label>
           <label>
-            字体粗细:
+            {{ t('stamp.taxNumber.fontWeight') }}:
             <select v-model="taxNumberFontWeight">
               <option value="normal">正常</option>
               <option value="bold">粗体</option>
@@ -404,11 +417,11 @@
             </select>
           </label>
           <label>
-            <span>压缩比例：{{ taxNumberCompression.toFixed(2) }}</span>
+            <span>{{ t('stamp.common.compression', { value: taxNumberCompression.toFixed(2) }) }}</span>
             <input type="range" v-model.number="taxNumberCompression" min="0.0" max="3" step="0.01" />
           </label>
           <label>
-            <span>字符间距 (mm)：{{ taxNumberLetterSpacing.toFixed(2) }}</span>
+            <span>{{ t('stamp.common.letterSpacing', { value: taxNumberLetterSpacing.toFixed(2) }) }}</span>
             <input
               type="range"
               v-model.number="taxNumberLetterSpacing"
@@ -418,80 +431,101 @@
             />
           </label>
           <label>
-            <span>垂直位置调整 (mm)：{{ taxNumberPositionY.toFixed(1) }}</span>
+            <span>{{ t('stamp.common.verticalPosition', { value: taxNumberPositionY.toFixed(1) }) }}</span>
             <input type="range" v-model.number="taxNumberPositionY" min="-10" max="10" step="0.1" />
           </label>
+        </div>
+      </div>
+
+      <!-- 图片列表设置 -->
+      <div class="control-group">
+        <div class="group-header" @click="toggleGroup('images')">
+          <h3>{{ t('stamp.images.title') }}</h3>
+          <span class="expand-icon" :class="{ 'expanded': expandedGroups.images }">▼</span>
+        </div>
+        <div class="group-content" v-show="expandedGroups.images">
+          <div v-for="(image, index) in imageList" :key="index" class="image-item">
+            <div class="image-header">
+              <span>{{ t('stamp.images.image', { index: index + 1 }) }}</span>
+              <button class="small-button delete-button" @click="removeImage(index)">删除</button>
+            </div>
+            <div class="image-preview" v-if="image.imageUrl">
+              <img :src="image.imageUrl" :alt="t('stamp.common.preview')" />
+            </div>
+            <label>
+              {{ t('stamp.images.select') }}:
+              <input type="file" @change="(e) => handleImageUpload(e, index)" accept="image/*" />
+            </label>
+            <label>
+              {{ t('stamp.images.width') }}:
+              <input type="number" v-model.number="image.imageWidth" min="1" max="100" step="0.5" />
+            </label>
+            <label>
+              {{ t('stamp.images.height') }}:
+              <input type="number" v-model.number="image.imageHeight" min="1" max="100" step="0.5" />
+            </label>
+            <label>
+              {{ t('stamp.images.positionX') }}:
+              <input type="number" v-model.number="image.positionX" min="-20" max="20" step="0.5" />
+            </label>
+            <label>
+              {{ t('stamp.images.positionY') }}:
+              <input type="number" v-model.number="image.positionY" min="-20" max="20" step="0.5" />
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="image.keepAspectRatio" />
+              {{ t('stamp.images.keepRatio') }}
+            </label>
+          </div>
+          <button class="add-button" @click="addNewImage">{{ t('stamp.common.addNew') }}</button>
         </div>
       </div>
 
       <!-- 五角星设置 -->
       <div class="control-group">
         <div class="group-header" @click="toggleGroup('star')">
-          <h3>五角星/图片设置</h3>
+          <h3>{{ t('stamp.star.title') }}</h3>
           <span class="expand-icon" :class="{ 'expanded': expandedGroups.star }">▼</span>
         </div>
         <div class="group-content" v-show="expandedGroups.star">
           <label class="checkbox-label">
             <input type="checkbox" v-model="shouldDrawStar" />
-            绘制五角星/图片
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" v-model="useStarImage" />
-            使用图片
+            {{ t('stamp.star.enable') }}
           </label>
           <div v-if="shouldDrawStar">
-            <div v-if="useStarImage">
-              <label>
-                选择图片:
-                <input type="file" @change="handleStarImageUpload" accept="image/*" />
-              </label>
-              <label>
-                图片宽度 (mm):
-                <input type="number" v-model.number="starImageWidth" min="1" max="20" step="0.5" />
-              </label>
-              <label>
-                图片高度 (mm):
-                <input type="number" v-model.number="starImageHeight" min="1" max="20" step="0.5" />
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="keepAspectRatio" />
-                保持宽高比
-              </label>
-            </div>
-            <label v-else>
-              五角星直径 (mm):
+            <label>
+              {{ t('stamp.star.diameter') }}:
               <input type="number" v-model.number="starDiameter" step="0.1" />
             </label>
             <label>
-              垂直位置 (mm):
+              {{ t('stamp.star.verticalPosition') }}:
               <input type="number" v-model.number="starPositionY" min="-10" max="10" step="0.1" />
             </label>
           </div>
         </div>
       </div>
-
       <!-- 防伪纹路设置 -->
       <div class="control-group">
         <div class="group-header" @click="toggleGroup('security')">
-          <h3>防伪纹路设置</h3>
+          <h3>{{ t('stamp.security.title') }}</h3>
           <span class="expand-icon" :class="{ 'expanded': expandedGroups.security }">▼</span>
         </div>
         <div class="group-content" v-show="expandedGroups.security">
           <label>
-            启用防伪纹路:
+            {{ t('stamp.security.enable') }}:
             <input type="checkbox" v-model="securityPatternEnabled" />
           </label>
-          <button @click="drawStamp(true, false)">刷新纹路</button>
+          <button @click="drawStamp(true, false)">{{ t('stamp.security.refresh') }}</button>
           <label
-            >纹路数量:
-            <input type="range" v-model.number="securityPatternCount" min="1" max="20" step="1"
+            >{{ t('stamp.security.count') }}:
+            <input type="range" v-model.number="securityPatternCount" min="1" max="100" step="1"
           /></label>
           <label
-            >纹路长度 (mm):
-            <input type="range" v-model.number="securityPatternLength" min="0.1" max="20" step="0.1"
+            >{{ t('stamp.security.length') }}:
+            <input type="range" v-model.number="securityPatternLength" min="0.1" max="100" step="0.1"
           /></label>
           <label
-            >纹路宽度 (mm):
+            >{{ t('stamp.security.width') }}:
             <input
               type="range"
               v-model.number="securityPatternWidth"
@@ -505,89 +539,89 @@
       <!-- 毛边效果设置 -->
       <div class="control-group">
         <div class="group-header" @click="toggleGroup('roughEdge')">
-          <h3>毛边效果设置</h3>
+          <h3>{{ t('stamp.roughEdge.title') }}</h3>
           <span class="expand-icon" :class="{ 'expanded': expandedGroups.roughEdge }">▼</span>
         </div>
         <div class="group-content" v-show="expandedGroups.roughEdge">
           <label class="checkbox-label">
             <input type="checkbox" v-model="shouldDrawRoughEdge" />
-            启用毛边效果
+            {{ t('stamp.roughEdge.enable') }}
           </label>
           <label v-if="shouldDrawRoughEdge">
-            毛边宽度 (mm):
+            {{ t('stamp.roughEdge.width') }}:
             <input type="range" v-model.number="roughEdgeWidth" min="0.05" max="0.5" step="0.05" />
             <span>{{ roughEdgeWidth.toFixed(2) }}</span>
           </label>
           <label v-if="shouldDrawRoughEdge">
-            毛边高度 (mm):
+            {{ t('stamp.roughEdge.height') }}:
             <input type="range" v-model.number="roughEdgeHeight" min="0.1" max="5" step="0.1" />
             <span>{{ roughEdgeHeight.toFixed(1) }}</span>
           </label>
           <label v-if="shouldDrawRoughEdge">
-            毛边概率:
+            {{ t('stamp.roughEdge.probability') }}:
             <input type="range" v-model.number="roughEdgeProbability" min="0" max="1" step="0.01" />
             <span>{{ roughEdgeProbability.toFixed(2) }}</span>
           </label>
           <label v-if="shouldDrawRoughEdge">
-            毛边偏移 (mm):
+            {{ t('stamp.roughEdge.shift') }}:
             <input type="range" v-model.number="roughEdgeShift" min="-10" max="10" step="0.01" />
             <span>{{ roughEdgeShift.toFixed(2) }}</span>
           </label>
           <label v-if="shouldDrawRoughEdge">
-            毛边点数:
+            {{ t('stamp.roughEdge.points') }}:
             <input type="range" v-model.number="roughEdgePoints" min="100" max="1000" step="10" />
             <span>{{ roughEdgePoints }}</span>
           </label>
-          <button @click="drawStamp(false, true)">刷新毛边</button>
+          <button @click="drawStamp(false, false, true)">{{ t('stamp.roughEdge.refresh') }}</button>
         </div>
       </div>
 
       <!-- 做旧效果设置 -->
       <div class="control-group">
         <div class="group-header" @click="toggleGroup('aging')">
-          <h3>做旧效果</h3>
+          <h3>{{ t('stamp.aging.title') }}</h3>
           <span class="expand-icon" :class="{ 'expanded': expandedGroups.aging }">▼</span>
         </div>
         <div class="group-content" v-show="expandedGroups.aging">
           <label class="checkbox-label">
             <input type="checkbox" v-model="applyAging" />
-            启用做旧效果
+            {{ t('stamp.aging.enable') }}
           </label>
           <label class="checkbox-label">
             <input type="checkbox" v-model="manualAging" />
-            手动做旧
+            {{ t('stamp.aging.manual') }}
           </label>
           <label v-if="applyAging">
-            做旧强度:
+            {{ t('stamp.aging.intensity') }}:
             <input type="range" v-model.number="agingIntensity" min="0" max="100" step="1" />
           </label>
-          <button @click="drawStamp(false, true)">刷新做旧</button>
+          <button @click="drawStamp(false, true)">{{ t('stamp.aging.refresh') }}</button>
         </div>
       </div>
 
       <!-- 内圈圆形设置 -->
       <div class="control-group">
         <div class="group-header" @click="toggleGroup('innerCircle')">
-          <h3>内圈圆形设置</h3>
+          <h3>{{ t('stamp.innerCircle.title') }}</h3>
           <span class="expand-icon" :class="{ 'expanded': expandedGroups.innerCircle }">▼</span>
         </div>
         <div class="group-content" v-show="expandedGroups.innerCircle">
-          <button @click="addNewInnerCircle">添加新行</button>
+          <button @click="addNewInnerCircle">{{ t('stamp.innerCircle.addNew') }}</button>
           <div v-for="(innerCircle, index) in innerCircleList" :key="index" class="inner-circle-item">
             <div class="inner-circle-header">
               <span>第 {{ index + 1 }} 行</span>
               <button class="small-button delete-button" @click="removeInnerCircle(index)">删除</button>
             </div>
             <label>
-              内圈圆线宽 (mm):
+              {{ t('stamp.innerCircle.lineWidth') }}:
               <input type="number" v-model.number="innerCircle.innerCircleLineWidth" min="0.05" max="0.5" step="0.05" />
             </label>
             <label>
-              内圈圆半径X (mm):
+              {{ t('stamp.innerCircle.radiusX') }}:
               <input type="number" v-model.number="innerCircle.innerCircleLineRadiusX" min="1" max="50" step="0.1" />
             </label>
             <label>
-              内圈圆半径Y (mm):
+              {{ t('stamp.innerCircle.radiusY') }}:
               <input type="number" v-model.number="innerCircle.innerCircleLineRadiusY" min="1" max="50" step="0.1" />
             </label>
           </div>
@@ -601,47 +635,73 @@
       <div style="display: flex; flex-direction: row; margin-top: 12px; gap: 12px">
         <!-- 做旧效果设置 -->
         <div class="control-group">
-          <h3>做旧效果</h3>
+          <h3>{{ t('stamp.aging.title') }}</h3>
           <label class="checkbox-label">
             <input type="checkbox" v-model="applyAging" />
-            启用做旧效果
+            {{ t('stamp.aging.enable') }}
           </label>
           <label class="checkbox-label">
             <input type="checkbox" v-model="manualAging" />
-            手动做旧
+            {{ t('stamp.aging.manual') }}
           </label>
           <label v-if="applyAging">
-            做旧强度:
+            {{ t('stamp.aging.intensity') }}:
             <input type="range" v-model.number="agingIntensity" min="0" max="100" step="1" />
           </label>
-          <button @click="drawStamp(false, true)">刷新做旧</button>
+          <button @click="drawStamp(false, true)">{{ t('stamp.aging.refresh') }}</button>
         </div>
 
         <!-- 修改提取印章功能部分 -->
         <div class="control-group">
-          <h3>提取印章</h3>
-          <button @click="openExtractStampTool">提取印章工具</button>
+          <h3>{{ t('stamp.extract.title') }}</h3>
+          <button @click="openExtractStampTool">{{ t('stamp.extract.tool') }}</button>
         </div>
       </div>
+      <div style="margin-top: 12px;">
+        <canvas ref="stampCanvas" width="600" height="600"></canvas>
+      </div>
+    </div>
 
-      <canvas ref="stampCanvas" width="600" height="600"></canvas>
+    <!-- 添加模板列表面板 -->
+    <div class="template-panel">
+      <div class="template-header">
+        <h3>{{ t('stamp.template.title') }}</h3>
+        <button class="add-template" @click="saveCurrentAsTemplate">
+          <span>+</span> {{ t('stamp.template.save') }}
+        </button>
+      </div>
+      
+      <div class="template-list">
+        <!-- 默认模板 -->
+        <div class="template-category">
+          <h4>{{ t('stamp.template.defaultTitle') }}</h4>
+          <div v-for="(template, index) in defaultTemplates" 
+               :key="'default-' + index" 
+               class="template-item"
+               :class="{ 'active': currentTemplateIndex === (-1 - index) }"
+               @click="loadDefaultTemplate(template)">
+            <div class="template-preview">
+              <img :src="template.preview" :alt="t('stamp.template.preview')" />
+            </div>
+            <div class="template-info">
+              <span class="template-name">{{ t('stamp.template.name') }}: {{ template.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import {
-  DrawStampUtils,
-  IRoughEdge,
-  type ICode,
-  type ICompany,
-  type IDrawStar,
-  type IInnerCircle,
-  type ISecurityPattern,
-  type IStampType,
-  type ITaxNumber
-} from './DrawStampUtils'
+import { ref, onMounted, watch, computed } from 'vue'
+import {DrawStampUtils} from './DrawStampUtils'
 import { getSystemFonts } from './utils/fontUtils'
+import { ICode, ICompany, IDrawImage, IDrawStampConfig, IDrawStar, IInnerCircle, IRoughEdge, ISecurityPattern, IStampType, ITaxNumber } from './DrawStampTypes'
+import { useI18n } from 'vue-i18n'
+import stampTemplate1 from './assets/templates/stamp_template1.json'
+import stampTemplate2 from './assets/templates/stamp_template2.json'
+
+const { t } = useI18n()
 
 const editorControls = ref<HTMLDivElement | null>(null)
 const stampCanvas = ref<HTMLCanvasElement | null>(null)
@@ -654,7 +714,7 @@ const companyName = ref('绘制印章有限责任公司')
 const stampCode = ref('1234567890123')
 // 税号
 const taxNumberValue = ref('000000000000000000')
-// 公司名称字体大小（毫米）
+// 公司名称字体大（毫米）
 const companyFontFamily = ref('Songti SC')
 const companyFontSizeMM = ref(4.2)
 const codeFontFamily = ref('SimSun')
@@ -667,7 +727,7 @@ const circleRadius = ref(20)
 // 圆形边框宽度（毫米）
 const circleBorderWidth = ref(1)
 // 主题颜色
-const primaryColor = ref('#ff0000')
+const primaryColor = ref('blue')
 // 五角星直径（毫米）
 const starDiameter = ref(14)
 // 做旧效果
@@ -682,9 +742,9 @@ const textDistributionFactor = ref(3)
 const adjustEllipseText = ref(false)
 // 调整椭圆文字因子
 const adjustEllipseTextFactor = ref(0.5)
-// 文字边距，控制公司名称文字距离椭圆边缘的距离（单位：毫米）
+// 文字边距，控制公���名称文字距离椭圆边缘的距离（单位：毫米）
 const textMarginMM = ref(1) // 默认值为1mm
-// 编码边距，控制印章编码距离椭圆边缘的距离（单位��毫米）
+// 编码边距，控制印章编码距离椭圆边缘的距离（单位毫米）
 const codeMarginMM = ref(1) // 默认值为1mm
 // 编码分布因子，控制印章编码在椭圆下方的分布范围
 const codeDistributionFactor = ref(20) // 默认值可以根据需要调整
@@ -702,10 +762,10 @@ const starPositionY = ref(0)
 const bottomTextPositionY = ref(-5)
 const companyNameCompression = ref(1)
 const companyNameFontWeight = ref(400)
-const bottomTextFontWeight = ref(400)
-const codeFontWeight = ref(400)
+const bottomTextFontWeight = ref<number|string>(400)
+const codeFontWeight = ref<number|string>(400)
 const taxNumberFontFamily = ref('Songti SC')
-const taxNumberFontWeight = ref(400)
+const taxNumberFontWeight = ref<number|string>(400)
 const bottomTextCompression = ref(1)
 const codeCompression = ref(1)
 // 防伪纹路
@@ -714,7 +774,7 @@ const securityPatternDensity = ref(0.5)
 const securityPatternWidth = ref(0.2) // 纹路宽度，单位为毫米
 const securityPatternColor = ref('#FF0000')
 const securityPatternCount = ref(5) // 防伪纹路数量
-const securityPatternLength = ref(2) // 纹路长度，单���为毫米
+const securityPatternLength = ref(2) // 纹路长度，单为毫米
 const showFullRuler = ref(false)
 const shouldDrawStar = ref(false) // 默认绘制五角星
 const taxNumberCompression = ref(1) // 税号文字宽度缩放比例
@@ -739,7 +799,7 @@ const showLegalDialog = ref(false) // 是否显示法律提示弹窗
 // 添加印章类型列表的响式数据
 const stampTypeList = ref<IStampType[]>([
   {
-    stampType: '发票专用章',
+    stampType: '印章类型',
     fontHeight: 4.6,
     fontFamily: 'SimSun',
     compression: 0.75,
@@ -762,7 +822,9 @@ const companyList = ref<ICompany[]>([
     fontWeight: 'normal',
     shape: 'ellipse',
     adjustEllipseText: false,
-    adjustEllipseTextFactor: 0.5
+    adjustEllipseTextFactor: 0.5,
+    startAngle: 0,
+    rotateDirection: "counterclockwise"
   }
 ])
 // 添加新的响应式变量
@@ -785,8 +847,43 @@ const innerCircleList = ref<IInnerCircle[]>([
     innerCircleLineRadiusY: 12
   }
 ])
-
 const templateFileInput = ref<HTMLInputElement | null>(null)
+// 添加图片列表的响应式数据
+const imageList = ref<IDrawImage[]>([{
+  imageUrl: '',
+  imageWidth: 10,
+  imageHeight: 10,
+  positionX: 0,
+  positionY: 0,
+  keepAspectRatio: true
+}])
+
+// 添加外圈圆形边的响应式数据
+const drawOutBorder = ref(true)
+const outBorderLineWidth = ref(1)
+
+// 添加新图片
+const addNewImage = () => {
+  console.log("add new image", imageList.value)
+  if(imageList.value === undefined || imageList.value === null) {
+    imageList.value = []
+  }
+  if(imageList.value.length < 10) {
+    imageList.value.push({
+      imageUrl: '',
+      imageWidth: 10,
+      imageHeight: 10,
+      positionX: 0,
+      positionY: 0,
+      keepAspectRatio: true
+    })
+  }
+}
+
+// 删除图片
+const removeImage = (index: number) => {
+  imageList.value.splice(index, 1)
+}
 
 // 保存模板
 const saveAsTemplate = () => {
@@ -800,7 +897,7 @@ const saveAsTemplate = () => {
   // 创建下载链接
   const link = document.createElement('a')
   link.href = url
-  link.download = '印章模板.json'
+  link.download = 'stamp_template.json'
   document.body.appendChild(link)
   link.click()
 
@@ -850,20 +947,18 @@ const loadTemplate = (event: Event) => {
 }
 
 // 修改图片上传处理函数
-const handleStarImageUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement;
+const handleImageUpload = (event: Event, index: number) => {
+  const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
-    const file = target.files[0];
-    const reader = new FileReader();
+    const file = target.files[0]
+    const reader = new FileReader()
     reader.onload = (e) => {
       if (e.target?.result) {
-        const imageUrl = e.target.result as string;
-        // 使用新方法更新图片
-        drawStampUtils.updateStarImage(imageUrl);
-        drawStamp();
+        imageList.value[index].imageUrl = e.target.result as string
+        drawStamp()
       }
-    };
-    reader.readAsDataURL(file);
+    }
+    reader.readAsDataURL(file)
   }
 }
 
@@ -909,7 +1004,9 @@ const addNewCompany = () => {
     fontWeight: 'normal',
     shape: 'ellipse',
     adjustEllipseText: false,
-    adjustEllipseTextFactor: 0.5
+    adjustEllipseTextFactor: 0.5,
+    startAngle: 0,
+    rotateDirection: "counterclockwise"
   })
 }
 
@@ -935,9 +1032,9 @@ const initDrawStampUtils = () => {
   drawStampUtils = new DrawStampUtils(stampCanvas.value, MM_PER_PIXEL)
 }
 
-const drawStamp = (refreshSecurityPattern: boolean = false, refreshOld: boolean = false) => {
+const drawStamp = (refreshSecurityPattern: boolean = false, refreshOld: boolean = false, refreshRoughEdge: boolean = false) => {
   // 使用drawstamputils进行绘制
-  drawStampUtils.refreshStamp(refreshSecurityPattern, refreshOld)
+  drawStampUtils.refreshStamp(refreshSecurityPattern, refreshOld, refreshRoughEdge)
 }
 
 
@@ -1061,7 +1158,13 @@ const updateDrawConfigs = () => {
   drawConfigs.companyList = companyList.value
   // 更新内圈列表
   drawConfigs.innerCircleList = innerCircleList.value
+  // 更新图片列表
+  drawConfigs.imageList = imageList.value
 
+    // 外圈圆形边
+    const outBorder: IInnerCircle = drawConfigs.outBorder
+  outBorder.drawInnerCircle = drawOutBorder.value
+  outBorder.innerCircleLineWidth = outBorderLineWidth.value
 
   drawStamp()
 }
@@ -1074,7 +1177,7 @@ const cancelSave = () => {
 // 确认保存
 const confirmSave = () => {
   showLegalDialog.value = false
-  drawStampUtils.saveStampAsPNG(512)
+  drawStampUtils.saveStampAsPNG()
 }
 
 const restoreDrawConfigs = () => {
@@ -1167,6 +1270,13 @@ const restoreDrawConfigs = () => {
   outThinCircleLineWidth.value = drawConfigs.outThinCircle.innerCircleLineWidth
   outThinCircleWidth.value = drawConfigs.outThinCircle.innerCircleLineRadiusX
   outThinCircleHeight.value = drawConfigs.outThinCircle.innerCircleLineRadiusY
+
+  // 图片列表
+  imageList.value = drawConfigs.imageList || []
+
+    // 外圈圆形边
+    drawOutBorder.value = drawConfigs.outBorder.drawInnerCircle
+  outBorderLineWidth.value = drawConfigs.outBorder.innerCircleLineWidth
 }
 
 // 添加系统字体列表
@@ -1266,7 +1376,10 @@ watch(
     starImageWidth,
     starImageHeight,
     keepAspectRatio,
-    innerCircleList
+    innerCircleList,
+    imageList,
+    drawOutBorder,
+    outBorderLineWidth,
   ],
   () => {
     updateDrawConfigs()
@@ -1300,7 +1413,7 @@ const stampTypePresets = ref<StampTypePreset[]>([
   },
   {
     id: 'invoice',
-    name: '发票专用章',
+    name: '印章类型',
     text: '发票专章\n增值税专用',
     fontSize: 4.2,
     letterSpacing: 0,
@@ -1365,7 +1478,7 @@ const updateFontPreview = (event: Event) => {
     }
   }
 
-  // 如果是input变化，同步更新select
+  // 如果input变化，同步更新select
   if (element.tagName === 'INPUT') {
     const select = element.parentElement?.querySelector('.font-select') as HTMLSelectElement;
     if (select) {
@@ -1386,494 +1499,110 @@ const expandedGroups = ref({
   security: false,
   roughEdge: false,
   aging: false,
-  innerCircle: false
+  innerCircle: false,
+  images: false // 新增图片列表设置
 })
 
 // 切换组的展开/折叠状态
 const toggleGroup = (groupName: string) => {
   expandedGroups.value[groupName] = !expandedGroups.value[groupName]
 }
+
+// 添加模板相关的类型定义
+interface Template {
+  name: string;
+  preview: string;
+  config: IDrawStampConfig;
+}
+
+// 添加模板相关的响应式数据
+const currentTemplateIndex = ref(-1)
+
+// 保存当前设置为模板
+const saveCurrentAsTemplate = async () => {
+  // 保存到本地存储
+  saveAsTemplate()
+}
+
+// 加载模板
+const loadDefaultTemplate = (template: Template) => {
+  try {
+    const newConfig = JSON.parse(JSON.stringify(template.config)) as IDrawStampConfig
+    newConfig.ruler.showRuler = true
+    newConfig.ruler.showFullRuler = true
+    newConfig.ruler.showSideRuler = true
+    newConfig.ruler.showCrossLine = true
+    newConfig.ruler.showCurrentPositionText = true
+    newConfig.ruler.showDashLine = true
+    newConfig.company.startAngle = template.config.company.startAngle
+    newConfig.company.rotateDirection = template.config.company.rotateDirection
+
+    console.log("load template", template, newConfig)
+    // 设置新的配置
+    drawStampUtils.setDrawConfigs(newConfig)
+    // 恢复界面显示
+    restoreDrawConfigs()
+    // 刷新印章显示
+    drawStamp()
+    // 更新当前选中的模板索引（使用负数表示默认模板）
+    currentTemplateIndex.value = -1 - defaultTemplates.findIndex(t => t === template)
+  } catch (error) {
+    console.error('加载默认模板失败:', error)
+    alert('加载默认模板失败')
+  }
+}
+
+// 保存模板列表到本地存储
+const saveTemplatesToStorage = () => {
+  localStorage.setItem('stampTemplates', JSON.stringify(templateList.value))
+}
+
+// 从本地存储加载模板列表
+const loadTemplatesFromStorage = () => {
+  // 生成默认模板的预览图
+  defaultTemplates.forEach(async (template) => {
+    // 临时创建一个 canvas 生成预览图
+    const tempCanvas = document.createElement('canvas')
+    tempCanvas.width = 500
+    tempCanvas.height = 500
+    const tempDrawStampUtils = new DrawStampUtils(tempCanvas, 8)
+    template.config.ruler.showRuler = false;
+    // 设置模板配置
+    tempDrawStampUtils.setDrawConfigs(template.config)
+    tempDrawStampUtils.refreshStamp()
+    
+    // 生成预览图
+    template.preview = tempCanvas.toDataURL('image/png')
+  })
+}
+
+// 在组件挂载时加载保存的模板
+onMounted(() => {
+  loadTemplatesFromStorage()
+})
+
+// 添加默认模板的类型定义和数据
+const defaultTemplates: Template[] = [
+  {
+    name: '印章1',
+    preview: '',
+    config: stampTemplate1 as IDrawStampConfig
+  },{
+    name: '印章2',
+    preview: '',
+    config: stampTemplate2 as IDrawStampConfig
+  }
+]
+
+// 添加新的响应式变量
+const showSecurityWarning = ref(localStorage.getItem('showSecurityWarning') !== 'false')
+
+watch(showSecurityWarning, (newValue) => {
+  localStorage.setItem('showSecurityWarning', String(newValue))
+})
+
+
+
 </script>
 <style scoped>
-.container {
-  display: flex;
-  height: 90vh;
-  overflow: hidden;
-  gap: 0;
-  padding-top: 140px; /* 根据免责声明的实际高度调整 */
-}
-
-.editor-controls {
-  width: 400px;
-  padding: 25px;
-  background-color: #f5f5f5;
-  overflow-y: scroll;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f5f5f5;
-}
-
-.editor-controls::-webkit-scrollbar {
-  width: 8px;
-}
-
-.editor-controls::-webkit-scrollbar-track {
-  background: #f5f5f5;
-}
-
-.editor-controls::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-.editor-controls::-webkit-scrollbar-thumb:hover {
-  background: #666;
-}
-
-.control-group {
-  width: calc(100% - 8px);
-  min-width: 200px;
-  margin-right: 8px;
-  background-color: white;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.control-group:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.button-group {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background-color: white;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.button-group button {
-  padding: 8px 12px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.button-group button:hover {
-  background-color: #45a049;
-  transform: translateY(-1px);
-}
-
-.control-group h3 {
-  margin: 0 0 15px 0;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #4caf50;
-  color: #333;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.inner-circle-list,
-.company-list,
-.stamp-type-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.inner-circle-item,
-.company-item,
-.stamp-type-item {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  padding: 12px;
-  transition: all 0.3s ease;
-}
-
-.inner-circle-item:hover,
-.company-item:hover,
-.stamp-type-item:hover {
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.editor-controls label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: #555;
-}
-
-.editor-controls input[type='text'],
-.editor-controls input[type='number'],
-.editor-controls select {
-  padding: 6px 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s ease;
-}
-
-.editor-controls input[type='text']:focus,
-.editor-controls input[type='number']:focus,
-.editor-controls select:focus {
-  border-color: #4caf50;
-  outline: none;
-}
-
-.editor-controls input[type='range'] {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 6px;
-  background: #ddd;
-  border-radius: 3px;
-  outline: none;
-}
-
-.editor-controls input[type='range']::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  background: #4caf50;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.editor-controls input[type='range']::-webkit-slider-thumb:hover {
-  background: #45a049;
-}
-
-.checkbox-label {
-  flex-direction: row !important;
-  align-items: center;
-  cursor: pointer;
-}
-
-.checkbox-label input[type='checkbox'] {
-  margin-right: 8px;
-  cursor: pointer;
-}
-
-.add-button,
-.delete-button {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.add-button {
-  background-color: #4caf50;
-  width: 100%;
-  margin-top: 8px;
-}
-
-.delete-button {
-  background-color: #dc3545;
-}
-
-.add-button:hover {
-  background-color: #45a049;
-}
-
-.delete-button:hover {
-  background-color: #c82333;
-}
-
-.inner-circle-header,
-.company-header,
-.stamp-type-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
-}
-
-.canvas-container {
-  flex: 1;
-  background-color: #f8f9fa;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  overflow: hidden;
-  padding-top: 40px; /* 根据免责声明的高度调整 */
-}
-
-canvas {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  border-radius: 8px;
-  background-color: white;
-}
-
-@media (max-width: 1200px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .editor-controls {
-    width: 100%;
-    max-height: 50vh;
-  }
-
-  .canvas-container {
-    height: 50vh;
-  }
-}
-
-.control-group button {
-  width: 100%;
-  margin-top: 8px;
-}
-
-select {
-  width: 100%;
-  padding: 6px 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s ease;
-}
-
-select option {
-  padding: 8px;
-}
-
-select option:hover {
-  background-color: #f5f5f5;
-}
-
-.font-input-group {
-  position: relative;
-  width: 100%;
-  display: flex;
-  gap: 8px;
-}
-
-.font-select {
-  flex: 1;
-  padding: 6px 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s ease;
-  cursor: pointer;
-}
-
-.font-input {
-  flex: 1;
-  padding: 6px 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s ease;
-}
-
-.font-select:hover,
-.font-input:hover {
-  border-color: #4caf50;
-}
-
-.font-select:focus,
-.font-input:focus {
-  border-color: #4caf50;
-  outline: none;
-}
-
-.font-select option {
-  padding: 8px;
-  font-size: 14px;
-}
-
-.font-select,
-.font-input {
-  font-family: var(--current-font, inherit);
-}
-
-.group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  padding: 8px 0;
-  user-select: none;
-}
-
-.group-header h3 {
-  margin: 0;
-  font-size: 16px;
-  color: #333;
-}
-
-.expand-icon {
-  transition: transform 0.3s ease;
-  font-size: 12px;
-  color: #666;
-}
-
-.expand-icon.expanded {
-  transform: rotate(180deg);
-}
-
-.group-content {
-  transition: all 0.3s ease-in-out;
-  overflow: hidden;
-}
-
-/* 修改法律免责说明样式 */
-.legal-disclaimer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 2000;
-  background-color: rgba(255, 241, 240, 0.98);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  padding: 12px 20px;
-  transition: all 0.3s ease;
-}
-
-.disclaimer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.warning-icon {
-  font-size: 24px;
-  color: #ff4d4f;
-  flex-shrink: 0;
-}
-
-.warning-text {
-  flex: 1;
-}
-
-.warning-text h3 {
-  color: #ff4d4f;
-  margin: 0 0 8px 0;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.warning-text p {
-  color: #cf1322;
-  margin: 4px 0;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.warning-text strong {
-  font-size: 16px;
-}
-
-/* 添加法律提示弹窗样式 */
-.legal-dialog-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2100;
-}
-
-.legal-dialog {
-  background-color: white;
-  padding: 24px;
-  border-radius: 8px;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.legal-dialog h3 {
-  color: #ff4d4f;
-  margin: 0 0 16px 0;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.legal-content {
-  margin-bottom: 20px;
-}
-
-.legal-content p {
-  color: #cf1322;
-  margin-bottom: 12px;
-}
-
-.legal-content ol {
-  color: #666;
-  padding-left: 20px;
-  margin: 0;
-}
-
-.legal-content li {
-  margin-bottom: 8px;
-  line-height: 1.5;
-}
-
-.dialog-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.cancel-button,
-.confirm-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.cancel-button {
-  background-color: #f5f5f5;
-  color: #666;
-}
-
-.confirm-button {
-  background-color: #4caf50;
-  color: white;
-}
-
-.cancel-button:hover {
-  background-color: #e8e8e8;
-}
-
-.confirm-button:hover {
-  background-color: #45a049;
-}
 </style>
